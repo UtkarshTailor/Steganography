@@ -53,6 +53,96 @@ def decode_message(image):
 # ============================
 # DWT STEGANOGRAPHY FUNCTIONS
 # ============================
+def encode_dct(img, text, channel=0, intensity=20):
+    block_size = 8
+    height, width = img.shape[:2]
+    grid_width = width // block_size
+    grid_height = height // block_size
+
+    text_bytes = text.encode('utf-8')
+    length = len(text_bytes)
+    bit_stream = [int(b) for b in format(length, '032b')]  
+    for byte in text_bytes:
+        bit_stream += [int(b) for b in format(byte, '08b')]
+
+    max_bits = (grid_width - 1) * (grid_height - 1)
+    if len(bit_stream) > max_bits:
+        raise ValueError("Message too large for image.")
+
+    img = img.astype(np.float32)
+    planes = cv2.split(img)
+
+    i = 0
+    for y in range(1, grid_height):
+        for x in range(1, grid_width):
+            if i >= len(bit_stream):
+                break
+
+            px = (x - 1) * block_size
+            py = (y - 1) * block_size
+            block = planes[channel][py:py+block_size, px:px+block_size]
+            dct_block = cv2.dct(block)
+
+            a, b = dct_block[4, 3], dct_block[3, 4]
+            bit = bit_stream[i]
+
+            if bit == 0 and a < b:
+                a, b = b, a
+            elif bit == 1 and a > b:
+                a, b = b, a
+
+            if abs(a - b) < intensity:
+                diff = (intensity - abs(a - b)) / 2
+                if bit == 0:
+                    a += diff
+                    b -= diff
+                else:
+                    a -= diff
+                    b += diff
+
+            dct_block[4, 3] = a
+            dct_block[3, 4] = b
+            planes[channel][py:py+block_size, px:px+block_size] = cv2.idct(dct_block)
+            i += 1
+
+    encoded = cv2.merge(planes)
+    return np.clip(encoded, 0, 255).astype(np.uint8)
+
+def decode_dct(img, channel=0):
+    block_size = 8
+    height, width = img.shape[:2]
+    grid_width = width // block_size
+    grid_height = height // block_size
+
+    img = img.astype(np.float32)
+    planes = cv2.split(img)
+
+    bits = []
+    for y in range(1, grid_height):
+        for x in range(1, grid_width):
+            px = (x - 1) * block_size
+            py = (y - 1) * block_size
+            block = planes[channel][py:py+block_size, px:px+block_size]
+            dct_block = cv2.dct(block)
+
+            a, b = dct_block[4, 3], dct_block[3, 4]
+            bits.append(1 if a < b else 0)
+
+    length_bits = bits[:32]
+    length = int("".join(map(str, length_bits)), 2)
+    message_bits = bits[32:32+8*length]
+
+    chars = []
+    for i in range(0, len(message_bits), 8):
+        byte = message_bits[i:i+8]
+        chars.append(chr(int("".join(map(str, byte)), 2)))
+
+    return ''.join(chars)
+
+
+# ============================
+# DWT STEGANOGRAPHY FUNCTIONS
+# ============================
 def textToBinary(text):
     return ''.join(format(ord(c), '08b') for c in text)
 
@@ -207,3 +297,35 @@ elif method == "DWT":
             final_msg = decoded_msg.split("[END]")[0]
             st.success("🎉 Hidden Message:")
             st.write(f"`{final_msg}`")
+
+
+elif method == "DCT":
+    if option == "📤 Hide Message":
+        st.subheader("📷 Upload an Image to Hide a Message (DCT)")
+        uploadedFile = st.file_uploader("Upload an Image", type=["png", "jpg", "jpeg"], key="upload_hide_dct")
+        message = st.text_area("✏️ Enter the secret message to hide:")
+
+        if uploadedFile and message:
+            fileBytes = np.asarray(bytearray(uploadedFile.read()), dtype=np.uint8)
+            image = cv2.imdecode(fileBytes, cv2.IMREAD_COLOR)
+            try:
+                stegoImage = encode_dct(image, message + "[END]")
+                st.image(stegoImage, caption="🔍 Encoded Image", channels="BGR", use_column_width=True)
+                _, buffer = cv2.imencode('.png', stegoImage)
+                st.download_button("⬇️ Download Encoded Image", data=buffer.tobytes(), file_name="encoded_image_dct.png", mime="image/png")
+            except ValueError as e:
+                st.error(str(e))
+
+    elif option == "📥 Extract Message":
+        st.subheader("🔎 Upload an Image to Extract the Hidden Message (DCT)")
+        uploadedFile = st.file_uploader("Upload the Stego Image", type=["png", "jpg", "jpeg"], key="upload_extract_dct")
+        if uploadedFile:
+            fileBytes = np.asarray(bytearray(uploadedFile.read()), dtype=np.uint8)
+            image = cv2.imdecode(fileBytes, cv2.IMREAD_COLOR)
+            try:
+                decoded_msg = decode_dct(image)
+                final_msg = decoded_msg.split("[END]")[0]
+                st.success("🎉 Hidden Message:")
+                st.write(f"`{final_msg}`")
+            except Exception as e:
+                st.error("⚠️ Could not extract message. Check the image or method used.")
