@@ -257,7 +257,7 @@ if method == "LSB":
                 img_io = io.BytesIO()
                 encodedImg.save(img_io, format='PNG')
                 img_io.seek(0)
-                st.download_button("⬇️ Download Encoded Image", img_io, file_name="encoded_image.png", mime="image/png")
+                st.download_button("⬇️ Download Encoded Image", img_io, file_name="encoded_image_lsb.png", mime="image/png")
     
     elif option == "📥 Extract Message":
         st.subheader("🔎 Upload an Image to Extract the Hidden Message (LSB)")
