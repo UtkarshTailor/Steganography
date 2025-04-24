@@ -22,7 +22,7 @@ def encodedImage(image, message):
         st.error("Message is too long to be hidden in this image!")
         return None
     
-    for idx, bit in enumerate(msgBits):
+    for idx, bit in enumerate(msgBits): # enumerate() adds a counter to each item
         val = flatImage[idx]
         binValue = bin(val)[:-1] + bit 
         flatImage[idx] = int(binValue, 2)
