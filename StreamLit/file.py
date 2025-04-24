@@ -51,7 +51,7 @@ def decode_message(image):
 
 
 # ============================
-# DWT STEGANOGRAPHY FUNCTIONS
+# DCT STEGANOGRAPHY FUNCTIONS
 # ============================
 def encode_dct(img, text, channel=0, intensity=20):
     block_size = 8
