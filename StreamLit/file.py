@@ -215,7 +215,7 @@ def decodeDWT(original_img, stegoImage, message_length, channel=0):
 # ============================
 # STREAMLIT UI
 # ============================
-st.set_page_config(page_title="LSB Steganography", page_icon="🔐", layout="wide")
+st.set_page_config(page_title="Steganography", page_icon="🔐", layout="wide")
 st.markdown("""
     <style>
         .stApp {
@@ -236,7 +236,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.markdown("<h1 class='main-title'>🔐 LSB Steganography: Hide & Extract Messages</h1>", unsafe_allow_html=True)
+st.markdown("<h1 class='main-title'>🔐 Steganography: Hide & Extract Messages</h1>", unsafe_allow_html=True)
 
 
 option = st.sidebar.radio("Choose an option:", ("📤 Hide Message", "📥 Extract Message"))
