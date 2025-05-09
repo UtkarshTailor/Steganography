@@ -70,13 +70,11 @@ Open the app in your browser when prompted, or visit: [http://localhost:8501](ht
 ## 👨‍💻 Contributors
 
 
-## 👨‍💻 Contributors
-
 | Name | GitHub |  
 |------|--------|  
 | Utkarsh Tailor | [@UtkarshTailor](https://github.com/UtkarshTailor) |  
 | Rajat Paliwal | [@Rajat0729](https://github.com/Rajat0729) |  
-| Rahul Yadav | [@rahul240802](https://github.com/rahul240802) |
+| Rahul Yadav | [@rahul240802](https://github.com/rahulsyadav24) |
 
 
 ---
