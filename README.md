@@ -31,11 +31,10 @@ cd Steganography
 
 ### 2. Install Dependencies
 
-Make sure you have Python 3.7+ installed.
+Make sure you have Python 3.7+ installed, then install the required libraries using pip:
 
 ```bash
-pip install -r requirements.txt
-```
+pip install streamlit numpy pillow opencv-python pywavelets
 
 
 ### 3. Run the App
